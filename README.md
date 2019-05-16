@@ -1,0 +1,236 @@
+# Final_Project_2019
+#Read Data
+The data was collected on board for 5 months in 2015, it was collected by observer on the pole-and-line vessel. The fishing ground is only 2 different area in Indonesia, it called North of Sulawesi and South of Sulawesi. 
+The CPUE is total catch/number of fishing at sea. 
+The primary data inlcuding : Total catch, Fishing time, Fishing duration, Total trip, Fishing ground, Live-bait, etc. 
+
+```{r setup, read the data}
+skj <- read.csv("Data_new_EcoStat.csv", header = TRUE, sep = ",")
+```
+
+##Attach and names of the data set
+```{r attach and names of the data set }
+head(skj)
+attach(skj)
+names(skj)
+```
+
+##Plots
+This is plot for total catch data:
+```{r plots, Raw data plots}
+plot(Total_Catch)
+```
+
+This is plot for log:
+```{r plots log, Raw data plots log}
+plot(log(Total_Catch))
+```
+
+This is plot for CPUE:
+```{r plots CPUE, Raw data plots CPUE}
+plot(CPUE)
+```
+
+This is boxplot for CPUE based on the Month:
+```{r boxplots}
+boxplot(CPUE~Month, xlab="Month", ylab="CPUE")
+```
+
+This is histogram plot for CPUE:
+```{r histogram log CPUE}
+hist(log(CPUE))
+```
+
+This is plotting for latitude and longitude:
+```{r plot for long and lat}
+plot(Long,Lat)
+```
+
+#Create the Model
+this is how to create the model based on the data.
+
+##Model 1
+#this model is calculated the linear model based on the fishing ground, time to fishing according to 5 Month
+```{r model 1}
+mod1 = lm(CPUE~as.factor(Time) + as.factor(Fishing_Ground) + as.factor(Month))
+mod1
+anov1 <- aov(mod1)
+summary (anov1)
+```
+
+##Model 2
+#this model is calculated the linear model based on the type of live bait has used on the fishing ground according to 5 Month
+```{r model 2}
+mod2 = lm(CPUE~as.factor(Live_Bait)+as.factor(Fishing_Ground) + as.factor(Month))
+summary (mod2)
+anov2 <- aov(mod2)
+summary(anov2)
+```
+
+##Model 3
+#this model is estimate the linear model based on the type live bait has used based on the Month and position
+
+```{r model 3}
+mod3 = lm(CPUE~as.factor(Live_Bait) + as.factor(Month) + Long + Lat)
+summary(mod3)
+anov3 <- aov(mod3)
+summary(anov3)
+```
+
+##Model 4
+#this model is to estimate the linear model by CPUE based on the fishing duration
+```{r model 4}
+mod4 = lm(CPUE~Fishing_Duration + as.factor(Live_Bait) + as.factor(Month))
+summary (mod4)
+anov4 <- aov(mod4)
+summary(anov4)
+```
+
+## Model 5
+#this model is to estsimate the linear model by CPUE based on the time of fishing
+```{r model 5}
+mod5 = lm(CPUE~as.factor(Time) + Fishing_Duration + Bait_Amount + as.factor(Month))
+summary (mod5)
+anov5 <- aov(mod5)
+summary(anov5)
+```
+
+#Model 6 
+#this model is to estimate the generalized linear model by CPUE
+```{r model 6}
+mod6 = glm(CPUE~poly(SST) + as.factor(Month) + as.factor(Time) + Long + Lat +
+             Fishing_Duration + Bait_Amount, family = gaussian)
+summary(mod6)
+plot(mod6)
+anov6 <- aov(mod6)
+summary(anov6)
+```
+
+##Model 7
+#this model is to estimate which live Bait influence to the total catch
+```{r model 7}
+mod7 = lm(Total_Catch~as.factor(Live_Bait), family = gaussian)
+summary (mod7)
+plot(mod7)
+anov7 <- aov(mod7)
+summary(anov7)
+```
+
+#If the result showed that the time of the fishing is significant affect to the CPUE, 
+#we can assumed that fish behavior od skipjack tuna has a feeding behaviour on that time
+#based on the result we can try to use t test, to estimate how it works
+
+#model 8
+```{r model 8}
+mod8 = glm(Total_Catch~as.factor(Time), family = gaussian)
+summary(mod8)
+plot(mod8)
+anov8 <- aov(mod8)
+summary(anov8)
+```
+
+#model 9
+#this model inform  that the value of the R-suared 0.1497, it means that the time as factor 
+#is significcant because the P value 0.002916 (not close to 0)
+```{r model 9}
+mod9 = lm(Total_Catch~as.factor(Time), family = gaussian)
+summary (mod9)
+anov9 <- aov(mod9)
+summary(anov9)
+```
+
+#model 10
+#this medel inform that the value of the R-squared 0.08, it means that significant linear
+#to the total catch, but the p value 0.1089
+```{r model 10}
+mod10 = lm(Total_Catch ~as.factor(Live_Bait), family = gaussian)
+summary (mod10)
+```
+
+#Create the function of a
+#Function a
+```{r install ggplot}
+library(ggplot2)
+```
+
+```{r function a}
+a <- ggplot(skj, aes( x = Total_Catch, y = Bait_Amount, color = CPUE))
+a + geom_point()
+a + geom_point() + facet_wrap(~Month)
+a + geom_point() + facet_wrap(~Time)
+a + geom_point() + facet_wrap(~Live_Bait)
+a + geom_point() + facet_wrap(~Fishing_Ground)
+```
+
+#Create the function of b
+#Function b
+```{r function b}
+b <- ggplot(skj, aes( x = Total_Catch, y = Fishing_Duration, color = CPUE))
+b + geom_point()
+b + geom_point() + facet_wrap(~Month)
+b + geom_point() + facet_wrap(~Time)
+b + geom_point() + facet_wrap(~Live_Bait)
+b + geom_point() + facet_wrap(~Fishing_Ground)
+```
+
+#Create the function of c
+#Function c 
+```{r function c}
+c <- ggplot(skj, aes( x = Total_Catch, y = CPUE, color = SST))
+c + geom_point()
+c + geom_point() + facet_wrap(~Month)
+c + geom_point() + facet_wrap(~Time)
+c + geom_point() + facet_wrap(~Live_Bait)
+c + geom_point() + facet_wrap(~Fishing_Ground)
+```
+
+#Plot the relationship between Fishing Duration and Bait Amount to CPUE based on the Month
+```{r ggplot CPUE vs Month}
+ggplot(skj,aes( x = Total_Catch, y = Fishing_Duration)) + geom_point() + geom_smooth(method="lm") + facet_wrap(~Time)
+ggplot(skj,aes( x = Total_Catch, y = Fishing_Duration)) + geom_point() + geom_smooth(method="lm") + facet_wrap(~Live_Bait)
+ggplot(skj,aes( x = Total_Catch, y = Bait_Amount)) + geom_point() + geom_smooth(method="lm") + facet_wrap(~Live_Bait)
+ggplot(skj,aes( x = Total_Catch, y = Fishing_Duration)) + geom_point() + geom_smooth(method="lm") + facet_wrap(~Time)
+ggplot(skj,aes( x = Total_Catch, y = Bait_Amount)) + geom_point() + geom_smooth(method="lm") + facet_wrap(~Time)
+```
+
+## The Linear Regression Plotting
+#Plot the linear model by the Bait Amount and Total Catch
+```{r plot regress 1}
+plot (Bait_Amount,Total_Catch, file = skj)
+z <- line(Bait_Amount, Total_Catch)
+abline(coef(z))
+cor(Bait_Amount,Total_Catch)
+```
+
+#Plot the linear model by the Fishing Duration and Total Catch
+```{r plot regress 2}
+plot (Fishing_Duration, Total_Catch, file = skj)
+z <- line (Fishing_Duration, Total_Catch)
+abline(coef(z))
+cor(Fishing_Duration,Total_Catch)
+```
+
+#Plot the linear model by the Bait Amount and CPUE
+```{r plot regress 3}
+plot (Bait_Amount, CPUE, file = skj)
+z <- line(Bait_Amount,CPUE)
+abline(coef(z))
+cor(Bait_Amount, CPUE)
+```
+
+#Plot the linear model by the Fishing Duration and CPUE
+```{r plot regress 4}
+plot (Fishing_Duration,CPUE, file = skj)
+z <- line(Fishing_Duration,CPUE)
+abline(coef(z))
+cor(Fishing_Duration, CPUE)
+```
+
+#Based on the GLM that the factor influence to the CPUE are fishing duration, time of fishing
+#total live-bait and month
+#the best live-bait to use is mixed between red anchovy and round scad
+#the best time to fishing is around 12pm - 4pm
+#the next possibilty research: what is the best size of hook to use (selectivity) based on the lenght of fish has caught and
+#any differences between fishing on the FAD (fish agregating devices) and fish schooling
+
+
